@@ -2,8 +2,8 @@ import React from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Form from "./common/form";
 import Joi from "joi-browser";
-import { getGenres } from "../services/fakeGenreService";
-import { saveMovie, getMovie } from "../services/fakeMovieService";
+import { getGenres } from "../services/genreService";
+import { saveMovie, getMovie, updateMovie } from "../services/movieService";
 
 const MovieForm = () => {
   const { id } = useParams();
@@ -31,7 +31,7 @@ class FormMovie extends Form {
   };
 
   schema = {
-    _id: Joi.string(),
+    _id: Joi.string().allow(""),
     title: Joi.string().required().label("Title"),
     genreId: Joi.string().required().label("Genre"),
     numberInStock: Joi.number()
@@ -47,18 +47,22 @@ class FormMovie extends Form {
       .label("Daily Rental Rate"),
   };
 
-  componentDidMount() {
-    const genres = getGenres();
+  async componentDidMount() {
+    const { data: genres } = await getGenres();
     this.setState({ genres });
 
     const { movieId } = this.props;
     if (movieId === "new") return;
 
     const { navigate } = this.props;
-    const movie = getMovie(movieId);
-    if (!movie) return navigate("/not-found");
 
-    this.setState({ data: this.mapToViewModel(movie) });
+    try {
+      const { data: movie } = await getMovie(movieId);
+      this.setState({ data: this.mapToViewModel(movie) });
+    } catch (error) {
+      if (error.response && error.response.status === 404)
+        navigate("/not-found");
+    }
   }
 
   mapToViewModel(movie) {
@@ -83,8 +87,14 @@ class FormMovie extends Form {
     );
   }
 
-  doSubmit = () => {
-    saveMovie(this.state.data);
+  doSubmit = async () => {
+    const movie = this.state.data;
+    const { _id: id } = movie;
+    if (id) {
+      await updateMovie(id, movie);
+    } else {
+      await saveMovie(movie);
+    }
 
     const { navigate } = this.props;
     navigate("/movies");

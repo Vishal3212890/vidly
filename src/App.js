@@ -13,16 +13,18 @@ import NotFound from "./components/notFound";
 import MovieForm from "./components/movieForm";
 import LoginForm from "./components/loginForm";
 import RegisterForm from "./components/registerForm";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 function App() {
   return (
     <Router>
+      <ToastContainer />
       <NavBar />
       <div className="container">
         <Routes>
           <Route path="/" element={<Navigate to="/movies" />} />
           <Route path="/movies" element={<Movie />} />
-          <Route path="/movies/new" element={<MovieForm />} />
           <Route path="/movies/:id" element={<MovieForm />} />
           <Route path="/customers" element={<Customers />} />
           <Route path="/rentals" element={<Rentals />} />

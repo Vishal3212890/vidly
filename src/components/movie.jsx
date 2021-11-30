@@ -1,6 +1,6 @@
 import React from "react";
-import { getMovies } from "../services/fakeMovieService";
-import { getGenres } from "../services/fakeGenreService";
+import { getMovies, deleteMovie } from "../services/movieService";
+import { getGenres } from "../services/genreService";
 import Pagination from "./common/pagination";
 import { paginate } from "../utils/paginate";
 import ListGroup from "./common/listGroup";
@@ -18,11 +18,13 @@ class Movie extends React.Component {
     searchQuery: "",
   };
 
-  componentDidMount() {
+  async componentDidMount() {
     const allGenre = { _id: "", name: "All Genres" };
-    const genres = [allGenre, ...getGenres()];
+    const { data } = await getGenres();
+    const genres = [allGenre, ...data];
+    const { data: movies } = await getMovies();
     this.setState({
-      movies: getMovies(),
+      movies,
       genres,
       selectedGenre: allGenre,
     });
@@ -84,9 +86,6 @@ class Movie extends React.Component {
 
   handleSearch = ({ currentTarget: input }) => {
     const { value } = input;
-    // const movies = this.state.movies.filter((movie) => {
-    //   return movie.title.toUpperCase().includes(value.toUpperCase());
-    // });
     this.setState({
       searchQuery: value,
       selectedGenre: this.state.genres[0],
@@ -94,8 +93,11 @@ class Movie extends React.Component {
     });
   };
 
-  handleDelete = (movie) => {
-    const movies = this.state.movies.filter((m) => m._id !== movie._id);
+  handleDelete = async (movie) => {
+    const { movies } = this.state;
+    const m = await deleteMovie(movie._id);
+    const index = movies.indexOf(m);
+    movies.splice(index, 1);
     this.setState({ movies });
   };
 
