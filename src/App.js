@@ -1,41 +1,53 @@
 import React from "react";
-import Movie from "./components/movie";
-import NavBar from "./components/navbar";
 import {
   BrowserRouter as Router,
   Routes,
   Route,
   Navigate,
 } from "react-router-dom";
-import Customers from "./components/customers";
-import Rentals from "./components/rentals";
+import { ToastContainer } from "react-toastify";
+import Movie from "./components/movie";
+import NavBar from "./components/navbar";
 import NotFound from "./components/notFound";
 import MovieForm from "./components/movieForm";
 import LoginForm from "./components/loginForm";
 import RegisterForm from "./components/registerForm";
-import { ToastContainer } from "react-toastify";
+import Logout from "./components/logout";
 import "react-toastify/dist/ReactToastify.css";
+import auth from "./services/authService";
 
-function App() {
-  return (
-    <Router>
-      <ToastContainer />
-      <NavBar />
-      <div className="container">
-        <Routes>
-          <Route path="/" element={<Navigate to="/movies" />} />
-          <Route path="/movies" element={<Movie />} />
-          <Route path="/movies/:id" element={<MovieForm />} />
-          <Route path="/customers" element={<Customers />} />
-          <Route path="/rentals" element={<Rentals />} />
-          <Route path="/login" element={<LoginForm />} />
-          <Route path="/register" element={<RegisterForm />} />
-          <Route path="/not-found" element={<NotFound />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </div>
-    </Router>
-  );
+class App extends React.Component {
+  state = {};
+
+  componentDidMount() {
+    const user = auth.getCurrentUser();
+    this.setState({ user });
+  }
+
+  render() {
+    const { user } = this.state;
+    return (
+      <Router>
+        <ToastContainer />
+        <NavBar user={user} />
+        <div className="container">
+          <Routes>
+            <Route path="/" element={<Navigate to="/movies" />} />
+            <Route path="/movies" element={<Movie user={user} />} />
+            <Route
+              path="/movies/:id"
+              element={user ? <MovieForm /> : <Navigate to="/login" />}
+            />
+            <Route path="/login" element={<LoginForm />} />
+            <Route path="/register" element={<RegisterForm />} />
+            <Route path="/logout" element={<Logout />} />
+            <Route path="/not-found" element={<NotFound />} />
+            <Route path="*" element={<Navigate to="/not-found" />} />
+          </Routes>
+        </div>
+      </Router>
+    );
+  }
 }
 
 export default App;

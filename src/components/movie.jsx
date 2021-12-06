@@ -40,6 +40,8 @@ class Movie extends React.Component {
       searchQuery,
     } = this.state;
 
+    const { user } = this.props;
+
     if (this.state.movies.length === 0)
       return <p className="mt-3">There are no movies in database.</p>;
 
@@ -55,10 +57,12 @@ class Movie extends React.Component {
           />
         </div>
         <div className="col">
-          <Link to="/movies/new" className="btn btn-primary">
-            New Movie
-          </Link>
-          <p className="mt-3">Showing {totalCount} movies from database.</p>
+          {user && (
+            <Link to="/movies/new" className="btn btn-primary mb-3">
+              New Movie
+            </Link>
+          )}
+          <p>Showing {totalCount} movies from database.</p>
           <input
             type="text"
             value={searchQuery}

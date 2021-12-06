@@ -1,8 +1,10 @@
 import React from "react";
 import Joi from "joi-browser";
 import Form from "./common/form";
+import auth from "../services/authService";
+import { useNavigate } from "react-router-dom";
 
-class LoginForm extends Form {
+class Component extends Form {
   state = {
     data: {
       username: "",
@@ -29,9 +31,24 @@ class LoginForm extends Form {
     );
   }
 
-  doSubmit = () => {
-    console.log("submitted");
+  doSubmit = async () => {
+    try {
+      const { username, password } = this.state.data;
+      await auth.login(username, password);
+      window.location = "/";
+    } catch (ex) {
+      if (ex.response && ex.response.status === 400) {
+        const errors = { ...this.state.errors };
+        errors.username = ex.response.data;
+        this.setState({ errors });
+      }
+    }
   };
 }
+
+const LoginForm = () => {
+  const navigate = useNavigate();
+  return <Component navigate={navigate} />;
+};
 
 export default LoginForm;
